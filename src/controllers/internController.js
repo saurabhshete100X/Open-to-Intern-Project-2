@@ -12,11 +12,11 @@ const isValidRequestBody = function (str) {
 const isValidfName = new RegExp(/^[a-z]+\s[a-z ]+$/i)
 const isValidEmail = new RegExp(/\S+@\S+\.\S+/)
 const isValidMobile = new RegExp(/^[6-9]\d{9}$/)
+
 //---------------------------------------Create Intern-------------------------------------------------------------------/
 const intern = async function (req, res) {
     try {
         requestBody = req.body
-
 
         //checking Body is Blank or not
         if (isValidRequestBody(requestBody)) {

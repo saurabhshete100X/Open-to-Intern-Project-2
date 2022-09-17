@@ -1,10 +1,10 @@
 const collegeModel = require("../models/collegeModel")
-const internModel=require("../models/internModel")
+const internModel = require("../models/internModel")
 
 //------------------Common Validation Function-----------------/
 
-const isValid=new RegExp(/^[A-Za-z]+$/);
-    
+const isValid = new RegExp(/^[A-Za-z]+$/);
+
 const isValidRequestBody = function (str) {
     return Object.keys(str).length > 0
 }
@@ -14,8 +14,7 @@ const isValidURL = function (str) {
     if (pattern.test(str)) return true;
 };
 
-
-const isValidString=new RegExp(/^[a-z]+\s[a-z ]+$/i)
+const isValidString = new RegExp(/^[a-z]+\s[a-z ]+$/i)
 
 //------------------Create College----------------------//
 
@@ -26,15 +25,16 @@ const createCollage = async function (req, res) {
             return res.status(400).send({ status: false, message: "Please Provide College Data" })
         }
         const { name, fullName, logoLink } = requestBody
-         if(!name){
+
+        if (!name) {
             return res.status(400).send({ status: false, message: "name is required" })
-         }
+        }
         if (!isValid.test(name)) {
             return res.status(400).send({ status: false, message: "Enter valid name" })
         }
-        if(!fullName){
+        if (!fullName) {
             return res.status(400).send({ status: false, message: "fullname is required" })
-         }
+        }
         if (!isValidString.test(fullName)) {
             return res.status(400).send({ status: false, message: "Enter valid fullname" })
         }
@@ -52,7 +52,7 @@ const createCollage = async function (req, res) {
         return res.status(201).send({ status: true, message: "New College Entry Created", data: newCollege })
 
     } catch (error) {
-       return res.status(500).send({status:false, message: error.message })
+        return res.status(500).send({ status: false, message: error.message })
     }
 }
 
@@ -60,33 +60,33 @@ const createCollage = async function (req, res) {
 
 
 
-const getCollege=async function(req,res){
-    try{
-    let cName=req.query.collegeName
-    if(!cName){
-        return res.status(400).send({status:false,message:"Enter college Name in abbreviated form"})
+const getCollege = async function (req, res) {
+    try {
+        let cName = req.query.collegeName
+        if (!cName) {
+            return res.status(400).send({ status: false, message: "Enter college Name in abbreviated form" })
+        }
+        const collegeData = await collegeModel.findOne({ name: cName })
+        if (collegeData == null) {
+            return res.status(404).send({ status: false, message: "No college found with this name" })
+        }
+        let interns = await internModel.find({ collegeId: collegeData['_id'] }).select({ _id: 1, name: 1, email: 1, mobile: 1 })
+        if (interns.length == 0) {
+            interns = "No intern applied for this college"
+        }
+        const requiredData = {
+            name: collegeData.name,
+            fullName: collegeData.fullName,
+            logoLink: collegeData.logoLink,
+            interns: interns
+        }
+        return res.status(200).send({ status: true, data: requiredData })
     }
-    const collegeData=await collegeModel.findOne({name:cName})
-    if(collegeData==null){
-        return res.status(404).send({status:false,message:"No college found with this name"})
+    catch (err) {
+        return res.status(500).send({ status: false, message: err.message })
     }
-    let interns=await internModel.find({collegeId:collegeData['_id']}).select({_id:1,name:1,email:1,mobile:1})
-    if(interns.length==0){
-        interns="No intern applied for this college"
-    }
-    const requiredData={
-        name: collegeData.name,
-    fullName: collegeData.fullName,
-    logoLink:collegeData.logoLink ,
-    interns:interns
-    }
-    return res.status(200).send({status:true,data:requiredData})
-}
-catch(err){
-    return res.status(500).send({status:false, message:err.message})
-}
 }
 
 
-module.exports.createCollage=createCollage
-module.exports.getCollege=getCollege
+module.exports.createCollage = createCollage
+module.exports.getCollege = getCollege
